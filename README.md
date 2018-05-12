@@ -18,5 +18,22 @@ $ npm install
 ```
 Serve with hot reload at localhost:3000 (default).
 ``` bash
+$ npm run dev
+```
+or
+Serve without reload at localhost:3000 (default).
+``` bash
 $ npm start
 ```
+
+## Testing
+Run unit testing once.
+``` bash
+$ npm test
+```
+Run unit testing with reload.
+``` bash
+$ npm test-watch
+```
+
+For a detailed explanation on how things work, check out the [guide](https://expressjs.com/) and [startup template](https://github.com/heroku/node-js-getting-started).

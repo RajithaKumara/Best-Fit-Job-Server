@@ -5,8 +5,8 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
-const session = require('express-session');
 const cors = require('cors');
+const auth = require('./src/config/auth/auth');
 
 
 /**
@@ -53,8 +53,8 @@ app.use(compression()); // compress all responses
  */
 app.use('/', index);
 app.use('/users', users);
-app.use('/seekers', seekers);
-app.use('/employers', employers);
+app.use('/seekers', auth, seekers);
+app.use('/employers', auth, employers);
 
 
 

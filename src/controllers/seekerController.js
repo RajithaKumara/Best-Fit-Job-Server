@@ -22,7 +22,7 @@ class SeekerController {
       //data validation
       let actionValidator = this.actionValidation(obj);
       if (actionValidator.valid === 'INVALID') {
-        reject(actionValidator);
+        return reject(actionValidator);
       }
       else {
         //User verification
@@ -36,14 +36,14 @@ class SeekerController {
                 message: 'Successfully stored general information.',
                 status: 201
               };
-              resolve(success);
+              return resolve(success);
             }).catch((error) => {
               let err = {
                 code: 'SC_ERROR_STORE_GENERAL',
                 message: error.message,
                 status: error.status
               };
-              reject(err);
+              return reject(err);
             });
           } else {
             let err = {
@@ -51,7 +51,7 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -59,7 +59,7 @@ class SeekerController {
             message: error.message,
             status: error.status
           };
-          reject(err);
+          return reject(err);
         });
       }
     });
@@ -76,7 +76,7 @@ class SeekerController {
       //data validation
       let actionValidator = this.actionValidation(obj);
       if (actionValidator.valid === 'INVALID') {
-        reject(actionValidator);
+        return reject(actionValidator);
       }
       else {
         //User verification
@@ -90,14 +90,14 @@ class SeekerController {
                 message: 'Successfully updated ' + action + ' information.',
                 status: 200
               };
-              resolve(success);
+              return resolve(success);
             }).catch((error) => {
               let err = {
                 code: 'SC_ERROR_UPDATE_FIELD',
                 message: error.message,
                 status: 500
               };
-              reject(err);
+              return reject(err);
             });
           } else {
             let err = {
@@ -105,7 +105,7 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -113,7 +113,7 @@ class SeekerController {
             message: error.message,
             status: error.status
           };
-          reject(err);
+          return reject(err);
         });
       }
     });
@@ -135,7 +135,7 @@ class SeekerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -144,10 +144,10 @@ class SeekerController {
           if (user.role === 'seeker') {
             //get specific field
             this.seeker.getField(userId, field).then((data) => {
-              resolve(data);
+              return resolve(data);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -156,11 +156,11 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -181,7 +181,7 @@ class SeekerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -190,10 +190,10 @@ class SeekerController {
           if (user.role === 'seeker') {
             //get profile details
             this.seeker.getSeekerById(userId).then((profile) => {
-              resolve(profile);
+              return resolve(profile);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -202,11 +202,11 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -223,7 +223,7 @@ class SeekerController {
       //data validation
       let actionValidator = this.actionValidation(obj);
       if (actionValidator.valid === 'INVALID') {
-        reject(actionValidator);
+        return reject(actionValidator);
       }
       else {
         //User verification
@@ -237,10 +237,10 @@ class SeekerController {
                 message: 'Successfully added skills.',
                 status: 200
               };
-              resolve(success);
+              return resolve(success);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -249,11 +249,11 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -270,7 +270,7 @@ class SeekerController {
       //data validation
       let actionValidator = this.actionValidation(obj);
       if (actionValidator.valid === 'INVALID') {
-        reject(actionValidator);
+        return reject(actionValidator);
       }
       else {
         //User verification
@@ -280,14 +280,14 @@ class SeekerController {
             //add job seeker new skills
             this.seeker.addTags(userId, data).then((doc) => {
               let success = {
-                code: 'SC_SUCCESS_ADD_SKILLS',
+                code: 'SC_SUCCESS_ADD_TAGS',
                 message: 'Successfully added tags.',
                 status: 200
               };
-              resolve(success);
+              return resolve(success);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -296,11 +296,11 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -323,7 +323,7 @@ class SeekerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -351,20 +351,20 @@ class SeekerController {
 
               //if no result found return empty array
               if (newJobArray.length === 0) {
-                resolve([]);
+                return resolve([]);
                 return;
               }
 
               //if job results found then search company details for particular jobs
               this.seeker.getBulkEmployers(employerIds).then((companyArray) => {
-                resolve([newJobArray, companyArray]);
+                return resolve([newJobArray, companyArray]);
               }).catch((error) => {
-                reject(error);
+                return reject(error);
 
               });
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -373,11 +373,11 @@ class SeekerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -389,7 +389,6 @@ class SeekerController {
     let userId = obj.userId;
     let userEmail = obj.userEmail;
     let category = obj.category;
-    console.log(category);
 
     return new Promise((resolve, reject) => {
       //data validation
@@ -401,7 +400,7 @@ class SeekerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification,authorization and get seeker profile
@@ -410,7 +409,7 @@ class SeekerController {
             //Get job suggestions from analysor
             this.analysor.suggestJob(seeker).then((suggestedJobs) => {
               if (suggestedJobs.length === 0) {
-                resolve({});
+                return resolve({});
                 return;
               }
 
@@ -423,30 +422,30 @@ class SeekerController {
 
                 //search company details for suggested jobs
                 this.seeker.getBulkEmployers(employerIds).then((companyArray) => {
-                  resolve({
+                  return resolve({
                     suggestedJobs: suggestedJobs,
                     jobs: jobArray,
                     companies: companyArray
                   });
                 }).catch((error) => {
-                  reject(error);
+                  return reject(error);
 
                 });
 
               }).catch((error) => {
-                reject(error);
+                return reject(error);
 
               });
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
             //Get job list for specified cluster
             this.analysor.getJobCluster(category).then((jobIds) => {
               if (jobIds.length === 0) {
-                resolve({});
+                return resolve({});
                 return;
               }
 
@@ -459,17 +458,17 @@ class SeekerController {
 
                 //Get company details
                 this.seeker.getBulkEmployers(employerIds).then((companyArray) => {
-                  resolve({
+                  return resolve({
                     jobs: jobArray,
                     companies: companyArray
                   });
                 }).catch((error) => {
-                  reject(error);
+                  return reject(error);
 
                 });
 
               }).catch((error) => {
-                reject(error);
+                return reject(error);
 
               });
             }).catch((error) => {
@@ -478,7 +477,7 @@ class SeekerController {
           }
 
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -500,7 +499,7 @@ class SeekerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification,authorization and get seeker profile
@@ -508,18 +507,18 @@ class SeekerController {
           //Get job suggestions from analysor
           this.analysor.suggestJob(seeker).then((suggestedJobs) => {
             if (suggestedJobs.length === 0) {
-              resolve([]);
+              return resolve([]);
             } else {
-              resolve(suggestedJobs[2]);
+              return resolve(suggestedJobs[2]);
             }
 
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
 
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }

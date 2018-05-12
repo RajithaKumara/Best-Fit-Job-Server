@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const authUserModel = mongoose.model('authUser', {
+const authUserSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -24,6 +24,18 @@ const authUserModel = mongoose.model('authUser', {
   profile: {
     type: String
   },
+  tokens: {
+    type: Array,
+    index: true     //indexing
+  }
 });
+
+authUserSchema.statics.findByToken = function (token) {
+  return this.findOne({
+    'tokens.token':token
+  },'_id role email');
+}
+
+const authUserModel = mongoose.model('authUser', authUserSchema);
 
 module.exports = authUserModel;

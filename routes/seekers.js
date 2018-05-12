@@ -113,7 +113,6 @@ router.post('/searchJobs', function (req, res) {
 /* Retrive job suggestions. */
 router.post('/getSuggestions', function (req, res) {
   let seekerController = new SeekerController();
-  console.log(req.body);
   seekerController.seekerGetSuggestions(req.body).then((result) => {
     res.status(200).send(result);
   }).catch((error) => {
@@ -124,7 +123,6 @@ router.post('/getSuggestions', function (req, res) {
 /* Retrive or check, are there any job suggestions for notify job seeker. */
 router.post('/getSuggestSummary', function (req, res) {
   let seekerController = new SeekerController();
-  console.log(req.body);
   seekerController.seekerGetSuggestSummary(req.body).then((result) => {
     res.status(200).send(result);
   }).catch((error) => {

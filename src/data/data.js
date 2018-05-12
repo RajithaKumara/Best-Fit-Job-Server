@@ -2,6 +2,8 @@
 const redirectURL = "<frontend root URL>";
 const mailerURL = "<php mail server URL>";
 const mailerKey = "<mail server auth key>";
+const jwtSecretKeySign = "<Secret Key1>";
+const jwtSecretKeyAuth = "<Secret Key2>";
 
 const dictionaryURL = "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/";
 const dictionaryAppId = "<Api id>";
@@ -17,6 +19,8 @@ module.exports = {
   redirectURL,
   mailerURL,
   mailerKey,
+  jwtSecretKeySign,
+  jwtSecretKeyAuth,
   dictionaryURL,
   dictionaryAppId,
   dictionaryAppKey,

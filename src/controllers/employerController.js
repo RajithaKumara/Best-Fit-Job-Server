@@ -28,7 +28,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -42,14 +42,14 @@ class EmployerController {
                 message: 'Successfully stored general information.',
                 status: 201
               };
-              resolve(success);
+              return resolve(success);
             }).catch((error) => {
               let err = {
                 code: 'EC_ERROR_STORE_EMP',
                 message: error.message,
                 status: error.status
               };
-              reject(err);
+              return reject(err);
             });
           } else {
             let err = {
@@ -57,7 +57,7 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -65,7 +65,7 @@ class EmployerController {
             message: error.message,
             status: error.status
           };
-          reject(err);
+          return reject(err);
         });
       }
     });
@@ -88,7 +88,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -102,14 +102,14 @@ class EmployerController {
                 message: 'Successfully updated owner information.',
                 status: 200
               };
-              resolve(success);
+              return resolve(success);
             }).catch((error) => {
               let err = {
                 code: 'EC_ERROR_UPDATE_OWNER',
                 message: error.message,
                 status: 500
               };
-              reject(err);
+              return reject(err);
             });
           } else {
             let err = {
@@ -117,7 +117,7 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -125,7 +125,7 @@ class EmployerController {
             message: error.message,
             status: error.status
           };
-          reject(err);
+          return reject(err);
         });
       }
     });
@@ -148,7 +148,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -162,14 +162,14 @@ class EmployerController {
                 message: 'Successfully updated company information.',
                 status: 200
               };
-              resolve(success);
+              return resolve(success);
             }).catch((error) => {
               let err = {
                 code: 'EC_ERROR_UPDATE_COMPANY',
                 message: error.message,
                 status: 500
               };
-              reject(err);
+              return reject(err);
             });
           } else {
             let err = {
@@ -177,7 +177,7 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -185,7 +185,7 @@ class EmployerController {
             message: error.message,
             status: error.status
           };
-          reject(err);
+          return reject(err);
         });
       }
     });
@@ -207,7 +207,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -216,10 +216,10 @@ class EmployerController {
           if (user.role === 'employer') {
             //get owner infromation from employer profile
             this.employer.getOwnerInfoById(userId).then((data) => {
-              resolve(data);
+              return resolve(data);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -228,11 +228,11 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -255,7 +255,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -264,10 +264,10 @@ class EmployerController {
           if (user.role === 'employer') {
             //get company infromation from employer profile
             this.employer.getCompanyInfoById(userId).then((data) => {
-              resolve(data);
+              return resolve(data);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -276,11 +276,11 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -303,7 +303,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -312,10 +312,10 @@ class EmployerController {
           if (user.role === 'employer') {
             //get profile details
             this.employer.getEmployerById(userId).then((profile) => {
-              resolve(profile);
+              return resolve(profile);
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -324,11 +324,11 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -351,7 +351,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //Employer verification and authorization
@@ -372,15 +372,15 @@ class EmployerController {
               message: 'Successfully added job.',
               status: 200
             };
-            resolve(success);
+            return resolve(success);
 
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
 
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -402,7 +402,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //Employer verification and authorization
@@ -410,14 +410,14 @@ class EmployerController {
           //Retrive jobs
           this.job.getJobs(userId).then((jobs) => {
 
-            resolve(jobs);
+            return resolve(jobs);
 
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -440,7 +440,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //Employer verification and authorization
@@ -460,15 +460,15 @@ class EmployerController {
               message: 'Successfully updated job.',
               status: 200
             };
-            resolve(success);
+            return resolve(success);
 
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
 
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -484,14 +484,15 @@ class EmployerController {
     return new Promise((resolve, reject) => {
       //data validation
       if (!this.validator.isValidObjectID(userId) ||
-        !this.validator.isEmail(userEmail)
+        !this.validator.isEmail(userEmail) ||
+        !this.validator.isValidObjectID(data._id)
       ) {
         let err = {
           code: 'EC_ERROR_DELETE_VALIDATION',
-          message: 'User id or email not valid.',
+          message: 'User id or email or job id not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //Employer verification and authorization
@@ -506,14 +507,14 @@ class EmployerController {
               message: 'Successfully deleted job.',
               status: 200
             };
-            resolve(success);
+            return resolve(success);
 
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -525,7 +526,6 @@ class EmployerController {
     let userId = obj.userId;
     let userEmail = obj.userEmail;
     let keyWords = obj.data;
-    console.log(field)
 
     return new Promise((resolve, reject) => {
       //data validation
@@ -537,7 +537,7 @@ class EmployerController {
           message: 'User id or email not valid.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //User verification
@@ -546,10 +546,10 @@ class EmployerController {
           if (user.role === 'employer') {
             //search job seekers
             this.employer.getSeekerByField(keyWords,field).then((resultArray)=>{
-              resolve(resultArray);
+              return resolve(resultArray);
               
             }).catch((error)=>{
-              reject(error);
+              return reject(error);
 
             });
           } else {
@@ -558,11 +558,11 @@ class EmployerController {
               message: 'Unauthorized user request.',
               status: 401
             };
-            reject(err);
+            return reject(err);
 
           }
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }

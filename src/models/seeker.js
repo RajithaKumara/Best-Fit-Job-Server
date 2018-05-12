@@ -15,7 +15,7 @@ class Seeker {
       let mongoose = this.dbConn.getConnection();
 
       authUserModel.findById(u_id).then((doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc === null || doc === undefined) {
           let err = {
@@ -24,7 +24,7 @@ class Seeker {
             status: ''
           };
           console.log(err.code, ':', err.message, ',_id:', u_id);
-          reject(err);
+          return reject(err);
         } else {
           let user = {
             id: doc._id.toString(),
@@ -33,14 +33,14 @@ class Seeker {
             role: doc.role
           };
           console.log('DB_SUCCESS_AUTH_GET:', user);
-          resolve(user);
+          return resolve(user);
         }
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         console.log('DB_ERROR_AUTH_GET:', error.message, ',_id:', u_id);
-        reject(error);
+        return reject(error);
 
       });
     });
@@ -52,7 +52,7 @@ class Seeker {
       let mongoose = this.dbConn.getConnection();
 
       authUserModel.findOne({ _id: u_id, email: _email }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc === null || doc === undefined) {
           let err = {
@@ -61,7 +61,7 @@ class Seeker {
             status: 400
           };
           console.log(err.code, ':', err.message, ',_id:', u_id, ',email:', _email);
-          reject(err);
+          return reject(err);
         } else {
           let user = {
             id: doc._id.toString(),
@@ -70,11 +70,11 @@ class Seeker {
             role: doc.role
           };
           console.log('DB_SUCCESS_AUTH_GET_E&I:', user);
-          resolve(user);
+          return resolve(user);
         }
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         let err = {
           code: 'DB_ERROR_AUTH_GET_E&I',
@@ -82,7 +82,7 @@ class Seeker {
           status: 500
         };
         console.log(err.code, ':', error.message, ',_id:', u_id);
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -95,7 +95,7 @@ class Seeker {
 
       seekerModel.findById(u_id).then((doc) => {
         console.log('DB_SUCCESS_SEEKER_GET:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc == null || doc == undefined) {
           let err = {
@@ -103,7 +103,7 @@ class Seeker {
             message: 'User not found. Please first complete general information in "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else {
           let seekerProfile = {
             general: doc.general,
@@ -114,18 +114,18 @@ class Seeker {
             extra: doc.extra,
             tags: doc.tags
           };
-          resolve(seekerProfile);
+          return resolve(seekerProfile);
 
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_PROFILE',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -139,7 +139,7 @@ class Seeker {
       seekerModel.findOne({ _id: u_id, email: _email },
         'general contacts experience education ksao extra tags').then((doc) => {
           console.log('DB_SUCCESS_SEEKER_GET:', u_id);
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
 
           if (doc == null || doc == undefined) {
             let err = {
@@ -147,20 +147,20 @@ class Seeker {
               message: 'User not found.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           } else {
-            resolve(doc);
+            return resolve(doc);
 
           }
         }).catch((error) => {
           console.log('DB_ERROR:', error.message, ',_id:', u_id);
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
           let err = {
             code: 'DB_ERROR_GET_PROFILE',
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         });
     });
@@ -179,13 +179,13 @@ class Seeker {
 
       seeker.save().then((doc) => {
         console.log('DB_SUCCESS_SEEKER_INSERT:', doc);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_STORE_GEN_INFO',
           message: error.message,
@@ -196,7 +196,7 @@ class Seeker {
           err.status = 400;
         }
 
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -208,9 +208,18 @@ class Seeker {
       let mongoose = this.dbConn.getConnection();
 
       let updatefield = this.selectAction(_field, _data);
+      if (updatefield === null){
+        let err = {
+          code: 'SEEKER_INVALID_FIELD',
+          message: "Invalid update field.",
+          status: 400
+        };
+        console.log('SEEKER_ERROR:', err.message, ',_id:', u_id);
+        return reject(err);
+      }
 
       seekerModel.findByIdAndUpdate(u_id, { $set: updatefield }, { new: true }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (error) {
           console.log('DB_ERROR:', error.message, ',_id:', u_id);
@@ -219,7 +228,7 @@ class Seeker {
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         } else {
           if (doc == null || doc == undefined) {
@@ -228,10 +237,10 @@ class Seeker {
               message: 'Seeker not found to update.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           } else {
             console.log('DB_SUCCESS_SEEKER_UPDATE:', u_id);
-            resolve(doc);
+            return resolve(doc);
           }
         }
       });
@@ -244,7 +253,7 @@ class Seeker {
       let mongoose = this.dbConn.getConnection();
 
       seekerModel.findById(u_id).then((doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc == null || doc == undefined) {
           let err = {
@@ -252,39 +261,39 @@ class Seeker {
             message: 'User not found. Please first complete general information in "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else if (doc[_field] == null) {
           let err = {
             code: 'SEEKER_NOT_COMPLETED',
-            message: 'User not completed ' + _field + ' field.',
+            message: 'User not completed `' + _field + '` field or invalid field.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else {
           let field = JSON.stringify(doc[_field]);
 
           try {
             field = JSON.parse(field);
             console.log('DB_SUCCESS_SEEKER_GET:', _field, ',_id:', doc._id);
-            resolve(field);
+            return resolve(field);
           } catch (e) {
             let err = {
               code: 'SEEKER_UNSTRUCTURED_DATA',
               message: 'User profile data is unstructured in ' + _field + ' field.',
               status: 500
             };
-            reject(err);
+            return reject(err);
           }
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_FIELD',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
       });
     });
   }
@@ -303,29 +312,28 @@ class Seeker {
             message: 'User not found. Please first complete general information in "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         }
         else {
-          // let ksao = JSON.parse(JSON.stringify(doc[_field]));
           let ksao = doc[_field];
 
           let newKsao = ksao.concat(_data)
 
           this.updateField(u_id, _field, newKsao).then((newDoc) => {
-            resolve(newDoc);
+            return resolve(newDoc);
           }).catch((error) => {
-            reject(error);
+            return reject(error);
           });
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_FIELD',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
       });
     });
   }
@@ -344,28 +352,28 @@ class Seeker {
             message: 'User not found. Please first complete general information in "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         }
         else {
-          let tags = JSON.parse(JSON.stringify(doc[_field]));
+          let tags = doc[_field];
 
           let newTags = tags.concat(_data);
 
           this.updateField(u_id, _field, newTags).then((newDoc) => {
-            resolve(newDoc);
+            return resolve(newDoc);
           }).catch((error) => {
-            reject(error);
+            return reject(error);
           });
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_FIELD',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
       });
     });
   }
@@ -378,18 +386,18 @@ class Seeker {
       employerModel.find({ '_id': { $in: _ids } },
         '_id companyName companyUrl date companyEmail aboutCompany companySize companyType companyBuilding companyAddress companyCountry groups').then((docSet) => {
 
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
 
-          resolve(docSet);
+          return resolve(docSet);
 
         }).catch((error) => {
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
           let err = {
             code: 'DB_ERROR_GET_EMP',
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         });
     });
@@ -425,7 +433,7 @@ class Seeker {
       case 'tags':
         return { tags: _data };
       default:
-        return {};
+        return null;
     }
   }
 

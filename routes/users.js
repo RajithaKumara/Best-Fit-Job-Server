@@ -10,7 +10,7 @@ router.post('/register', function (req, res) {
   userController.userRegister(req.body).then(() => {
     res.status(200).send();
   }).catch((error) => {
-    res.status(500).send(error);
+    res.status(error.status).send(error);
   });
 });
 
@@ -18,7 +18,6 @@ router.post('/register', function (req, res) {
 router.get('/signup/:id', function (req, res) {
   let userController = new UserController();
   userController.tempUserSignUp(req.params.id).then((user) => {
-    console.log('user',user)
     res.status(200);
     if (user._id === undefined) {
       res.redirect(redirectURL + '/#/Login/?email=' + user.email.toString());
@@ -36,7 +35,6 @@ router.get('/signup/:id', function (req, res) {
 /* Permanent user signup with password after verifying email. */
 router.post('/userSignUp', function (req, res) {
   let userController = new UserController();
-  // userController.userSignUp(req.body);
   userController.userSignUp(req.body).then((user) => {
     res.status(200).send(user);
   }).catch((error) => {
@@ -50,7 +48,17 @@ router.post('/login', function (req, res) {
   userController.userLogin(req.body).then((user) => {
     res.status(200).send(user);
   }).catch((error) => {
-    res.status(500).send(error);
+    res.status(error.status).send(error);
+  });
+});
+
+/* User logging out. */
+router.post('/logout', function (req, res) {
+  let userController = new UserController();
+  userController.userLogout(req.body).then(() => {
+    res.status(200).send();
+  }).catch(() => {
+    res.status(500).send();
   });
 });
 

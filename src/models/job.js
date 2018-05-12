@@ -35,20 +35,20 @@ class Job {
 
       job.save().then((doc) => {
         console.log('DB_SUCCESS_JOB_INSERT:', doc);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_STORE_JOB',
           message: error.message,
           status: 500
         };
 
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -73,7 +73,7 @@ class Job {
       };
 
       jobModel.findByIdAndUpdate(job_id, { $set: job }, { new: true }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (error) {
           console.log('DB_ERROR:', error.message, ',_id:', job_id);
@@ -82,7 +82,7 @@ class Job {
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         } else {
           if (doc == null || doc == undefined) {
@@ -91,10 +91,10 @@ class Job {
               message: 'Job not found to update.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           } else {
             console.log('DB_SUCCESS_JOB_UPDATE:', doc);
-            resolve(doc);
+            return resolve(doc);
           }
         }
       });
@@ -108,18 +108,18 @@ class Job {
 
       jobModel.find({ 'id': u_id }).then((doc) => {
         console.log('DB_SUCCESS_EMP_GET:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -130,22 +130,21 @@ class Job {
     return new Promise((resolve, reject) => {
       let mongoose = this.dbConn.getConnection();
 
-      jobModel.findOneAndRemove({ _id: job_id, id: u_id }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+      jobModel.findOneAndRemove({ _id: job_id, id: u_id }).then((doc) => {
+        this.dbConn.closeConnection(mongoose);
+        console.log('DB_SUCCESS_JOB_DELETE:', doc);
+        return resolve(doc);
 
-        if (error) {
-          console.log('DB_ERROR:', error.message, ',_id:', job_id);
-          let err = {
-            code: 'DB_ERROR_JOB_DELETE',
-            message: error.message,
-            status: 500
-          };
-          reject(err);
+      }).catch((error) => {
+        this.dbConn.closeConnection(mongoose);
+        console.log('DB_ERROR:', error.message, ',_id:', job_id);
+        let err = {
+          code: 'DB_ERROR_JOB_DELETE',
+          message: error.message,
+          status: 500
+        };
+        return reject(err);
 
-        } else {
-          console.log('DB_SUCCESS_JOB_DELETE:', doc._id);
-          resolve(doc);
-        }
       });
     });
   }
@@ -167,18 +166,18 @@ class Job {
         enable: true
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -194,18 +193,18 @@ class Job {
         enable: true
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -221,18 +220,18 @@ class Job {
         enable: true
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -258,18 +257,18 @@ class Job {
       },
         '_id id jobTitle jobDescription url salary contacts offers online tags').then((docSet) => {
 
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
 
-          resolve(docSet);
+          return resolve(docSet);
 
         }).catch((error) => {
-          try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+          this.dbConn.closeConnection(mongoose);
           let err = {
             code: 'DB_ERROR_GET_JOBS',
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         });
     });
@@ -293,18 +292,18 @@ class Job {
         privacy: false
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -321,18 +320,18 @@ class Job {
         privacy: false
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -349,18 +348,18 @@ class Job {
         privacy: false
       }, '_id id jobTitle jobDescription url salary contacts offers online tags').then((doc) => {
 
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });

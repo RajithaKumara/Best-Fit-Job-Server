@@ -8,7 +8,7 @@ const seekerModel = mongoose.model('seeker', {
     index: true     //indexing
   },
   general: {
-    type: JSON,
+    type: Object,
     required: true
   },
   contacts: {

@@ -52,17 +52,17 @@ class Analysor {
 
         //Transaction execution
         multi.exec((err, reply) => {
-          try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+          this.redisConn.closeConnection(client);
 
           if (err) {
-            reject(err);
+            return reject(err);
           } else {
-            resolve("Clustering finish");
+            return resolve("Clustering finish");
           }
         });
 
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
 
     });
@@ -86,10 +86,12 @@ class Analysor {
 
         if (JSON.stringify(jobCategoriesArray.sort()) != JSON.stringify(newJobCategoriesArray.sort())) {
 
+          let allJobCategoriesSet = new Set(newJobCategoriesArray);
           let newJobCategoriesSet = new Set(newJobCategoriesArray);
           let jobCategoriesSet = new Set(jobCategoriesArray);
 
-          //Remove duplicate cluster labels from two Sets
+          //Remove intersection from two Sets
+          let intersection = [];
           for (let j = 0; j < newJobCategoriesArray.length; j++) {
             let itemJ = newJobCategoriesArray[j];
             for (let i = 0; i < jobCategoriesArray.length; i++) {
@@ -103,19 +105,22 @@ class Analysor {
           }
 
           //Append default cluster if not have any cluster
+          let allCategoriesArray = Array.from(allJobCategoriesSet);
           let newCategoriesArray = Array.from(newJobCategoriesSet);
-          if (newCategoriesArray.length === 0) {
+          let oldCategoriesArray = Array.from(jobCategoriesSet);
+          if (allCategoriesArray.length === 0) {
             newCategoriesArray.push(defaultCluster);
+            allCategoriesArray.push(defaultCluster);
           }
 
           let client = this.redisConn.getConnection();
           let multi = client.multi(); //Start transaction
 
           //Update category array to particular job(job id).
-          this.setJobCategories(multi, jobId, newCategoriesArray);
+          this.setJobCategories(multi, jobId, allCategoriesArray);
 
           //Remove from old clusters
-          Array.from(jobCategoriesSet).forEach((clusterLabel, index) => {
+          oldCategoriesArray.forEach((clusterLabel, index) => {
             this.removeFromCluster(multi, clusterLabel, jobId);
           });
 
@@ -126,21 +131,21 @@ class Analysor {
 
           //Transaction execution
           multi.exec((err, reply) => {
-            try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+            this.redisConn.closeConnection(client);
 
             if (err) {
-              reject(err);
+              return reject(err);
             } else {
-              resolve("Cluster update finish");
+              return resolve("Cluster update finish");
             }
           });
 
         } else {
-          resolve("Cluster update finish with no changes.");
+          return resolve("Cluster update finish with no changes.");
         }
 
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
     });
   }
@@ -153,9 +158,9 @@ class Analysor {
     return new Promise((resolve, reject) => {
 
       this.getJobCategories(jobId).then((categoriesArray) => {
-
-        if (categoriesArray === null) {
-          reject("Not found");
+        
+        if (categoriesArray === null || categoriesArray.length === 0) {
+          return reject("Not found");
           return;
         }
 
@@ -172,17 +177,17 @@ class Analysor {
 
         //Transaction execution
         multi.exec((err, reply) => {
-          try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+          this.redisConn.closeConnection(client);
 
           if (err) {
-            reject(err);
+            return reject(err);
           } else {
-            resolve("Cluster update finish");
+            return resolve("Cluster delete finish");
           }
         });
 
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
     });
   }
@@ -219,10 +224,10 @@ class Analysor {
 
         //Batch process execution
         batch.exec((err, reply) => {
-          try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+          this.redisConn.closeConnection(client);
 
           if (err) {
-            reject(err);
+            return reject(err);
           } else {
             //Collect requested cluster content
             Promise.all(jobClusterArray).then((clustersArray) => {
@@ -232,28 +237,27 @@ class Analysor {
                 jobArray = Array.from(new Set(tempArray));
               });
 
-              console.log("jobArray", jobArray);
               //if there are no suggestions
               if (jobArray.length === 0) {
-                resolve([]);
+                return resolve([]);
                 return;
               }
 
               this.getJobCategoriesBulk(jobArray).then((categories) => {
-                resolve([jobArray, categories, categoriesArray]);
+                return resolve([jobArray, categories, categoriesArray]);
               }).catch((error) => {
-                reject(error);
+                return reject(error);
               });
 
             }).catch((error) => {
-              reject(error);
+              return reject(error);
 
             });
           }
         });
 
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
 
     });
@@ -268,9 +272,9 @@ class Analysor {
       let client = this.redisConn.getConnection();
 
       this.getCluster(client, cluster).then((jobArray) => {
-        resolve(jobArray);
+        return resolve(jobArray);
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       })
     });
   }
@@ -318,13 +322,13 @@ class Analysor {
           } catch (error) {
             console.log(error);
           }
-          resolve(categories);
+          return resolve(categories);
         } else if (error) {
-          resolve([]);
+          return resolve([]);
         } else if (response.statusCode === 400) {
-          resolve([]);
+          return resolve([]);
         } else {
-          reject([]);
+          return reject([]);
         }
       });
     });
@@ -416,11 +420,11 @@ class Analysor {
         timeout: 3000
       }, (error, response, body) => {
         if (!error && response.statusCode == 200) {
-          resolve(body);
+          return resolve(body);
         } if (response.statusCode == 404) {
-          resolve({});
+          return resolve({});
         } else {
-          reject(error);
+          return reject(error);
         }
       });
     });
@@ -443,12 +447,12 @@ class Analysor {
       let client = this.redisConn.getConnection();
 
       client.hsetnx("map", tag, category, (err, reply) => {
-        try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+        this.redisConn.closeConnection(client);
 
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       })
     });
@@ -463,12 +467,12 @@ class Analysor {
       let client = this.redisConn.getConnection();
 
       client.hmset("map", object, (err, reply) => {
-        try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+        this.redisConn.closeConnection(client);
 
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       })
     });
@@ -482,24 +486,24 @@ class Analysor {
   classifyByTags(tags) {
     return new Promise((resolve, reject) => {
       if (tags.length === 0) {
-        resolve([]);
+        return resolve([]);
         return;
       }
 
       let client = this.redisConn.getConnection();
 
       client.hmget("map", tags, (err, array) => {
-        try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+        this.redisConn.closeConnection(client);
 
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
           let categoriesArray = Array.from(new Set(array));
           let nullIndex = categoriesArray.indexOf(null);
           if (nullIndex != -1) {
             categoriesArray.splice(nullIndex, 1);
           }
-          resolve(categoriesArray);
+          return resolve(categoriesArray);
         }
       });
     });
@@ -518,23 +522,23 @@ class Analysor {
       //get all categories from "categories" list
       client.lrange("categories", 0, -1, (err, categoriesArray) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
           //check category name already exist in the list
           let index = categoriesArray.indexOf(category);
           if (index >= 0) {
-            try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+            this.redisConn.closeConnection(client);
 
-            reject("Already exist.");
+            return reject("Already exist.");
           } else {
             //push into "categories" list the new category
             client.lpush("categories", category, (err, reply) => {
-              try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+              this.redisConn.closeConnection(client);
 
               if (err) {
-                reject(err);
+                return reject(err);
               } else {
-                resolve(reply);
+                return resolve(reply);
               }
             });
           }
@@ -553,9 +557,9 @@ class Analysor {
     return new Promise((resolve, reject) => {
       client.hset("jobs", jobId, JSON.stringify(categoryArray), (err, reply) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       });
     });
@@ -570,13 +574,13 @@ class Analysor {
       let client = this.redisConn.getConnection();
 
       client.hget("jobs", jobId, (err, reply) => {
-        try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+        this.redisConn.closeConnection(client);
         if (err) {
-          reject(err);
+          return reject(err);
         } else if (reply === null) {
-          resolve([]);
+          return resolve([]);
         } else {
-          resolve(JSON.parse(reply));
+          return resolve(JSON.parse(reply));
         }
       });
     });
@@ -591,13 +595,13 @@ class Analysor {
       let client = this.redisConn.getConnection();
 
       client.hmget("jobs", jobIds, (err, reply) => {
-        try { this.redisConn.closeConnection(client); } catch (e) { console.log(e); }
+        this.redisConn.closeConnection(client);
         if (err) {
-          reject(err);
+          return reject(err);
         } else if (reply === null) {
-          resolve([]);
+          return resolve([]);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       });
     });
@@ -612,9 +616,9 @@ class Analysor {
     return new Promise((resolve, reject) => {
       client.hdel("jobs", jobId, (err, reply) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       });
     });
@@ -630,9 +634,9 @@ class Analysor {
     return new Promise((resolve, reject) => {
       client.lpush(cluster, jobId, (err, reply) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       });
     });
@@ -648,9 +652,9 @@ class Analysor {
     return new Promise((resolve, reject) => {
       client.lrem(cluster, 0, jobId, (err, reply) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(reply);
+          return resolve(reply);
         }
       });
     });
@@ -666,9 +670,9 @@ class Analysor {
       //get all jobs from particular cluster(list)
       client.lrange(cluster, 0, -1, (err, jobs) => {
         if (err) {
-          reject(err);
+          return reject(err);
         } else {
-          resolve(jobs);
+          return resolve(jobs);
         }
       });
     });

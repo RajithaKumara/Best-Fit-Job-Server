@@ -3,7 +3,8 @@ const Job = require('../models/job');
 const Validator = require('../models/validator');
 const request = require('request');
 const bcrypt = require('bcrypt');
-const { mailerURL, mailerKey } = require('../data/data');
+const jwt = require('jsonwebtoken');
+const { mailerURL, mailerKey, jwtSecretKeySign } = require('../data/data');
 
 class UserController {
 
@@ -23,65 +24,71 @@ class UserController {
         let err = {
           code: 'UC_ERROR_REGISTER_VALIDATION',
           message: 'User name or email not valid.',
-          status: ''
+          status: 400
         };
-        console.log(err.code, ':', err.message, ',email:', userEmail);
-        reject(err);
+        //console.log(err.code, ':', err.message, ',email:', userEmail);
+        return reject(err);
       }
       //store temp user and send email
       else {
         this.user.register(userName, userEmail).then((userId) => {
-          this.sendVerificationEmail(userName, userEmail, userId).then(() => {
+          let userToken = jwt.sign({ userId }, jwtSecretKeySign);
+          this.sendVerificationEmail(userName, userEmail, userToken).then(() => {
             let success = {
               code: 'UC_SUCCESS_REGISTER_EMAIL',
               message: 'Email send successfully.',
-              status: ''
+              status: 200
             };
-            console.log(success.code, ':', success.message, ',email:', userEmail);
-            resolve(success);
+            //console.log(success.code, ':', success.message, ',email:', userEmail);
+            return resolve(success);
           }).catch((error) => {
             let err = {
               code: 'UC_ERROR_REGISTER_EMAIL',
               message: 'Email sending error.',
-              status: ''
+              status: 500
             };
-            console.log(err.code, ':', err.message, ',email:', userEmail);
-            reject(err);
+            //console.log(err.code, ':', err.message, ',email:', userEmail);
+            return reject(err);
           });
         }).catch((error) => {
           let err = {
             code: 'UC_ERROR_REGISTER_STORE',
             message: 'User data storing error.',
-            status: ''
+            status: 500
           };
-          console.log(err.code, ':', err.message, ',email:', userEmail);
-          reject(err);
+          //console.log(err.code, ':', err.message, ',email:', userEmail);
+          return reject(err);
         });
       }
     });
   }
 
-  /**Identify temporary user come from varification email. */
-  tempUserSignUp(tempUserId) {
+  /**Identify temporary user come from verification email. */
+  tempUserSignUp(tempUserToken) {
     return new Promise((resolve, reject) => {
       //data validation
+      let tempUserId = "";
+      try {
+        let decoded = jwt.verify(tempUserToken, jwtSecretKeySign);
+        tempUserId = decoded.userId;
+      } catch (e) { }
       if (!this.validator.isValidObjectID(tempUserId)) {
         let err = {
           code: 'UC_ERROR_TEMP_SIGNUP',
           message: 'Invalid user id.',
-          status: ''
+          status: 400
         };
-        console.log(err.code, ':', err.message, ',_id:', tempUserId);
-        reject(err);
+        //console.log(err.code, ':', err.message, ',_id:', tempUserId);
+        return reject(err);
       }
       //find tempuser by id
       else {
-        this.user.tempSignUp(tempUserId).then((user) => {
-          console.log('UC_SUCCESS_TEMP_SIGNUP:', user);
-          resolve(user);
+        this.user.tempSignUp(tempUserId,tempUserToken).then((user) => {
+          //console.log('UC_SUCCESS_TEMP_SIGNUP:', user);
+          return resolve(user);
         }).catch((error) => {
           console, log('UC_ERROR_TEMP_SIGNUP:', error.message);
-          reject(error);
+          return reject(error);
         });
       }
     });
@@ -89,19 +96,24 @@ class UserController {
 
   /**User sign up permanently by email and password. */
   userSignUp(user) {
-    let userId = user.userId;
+    let userToken = user.userId;
     let userEmail = user.userEmail;
 
     return new Promise((resolve, reject) => {
       //data validation
+      let userId = "";
+      try {
+        let decoded = jwt.verify(userToken, jwtSecretKeySign);
+        userId = decoded.userId;
+      } catch (e) { }
       if (!this.validator.isValidObjectID(userId) || !this.validator.isEmail(userEmail)) {
         let err = {
           code: 'UC_ERROR_SIGNUP_VALIDATION',
           message: 'User id or email not valid.',
           status: 400
         };
-        console.log(err.code, ':', err.message, ',email:', userEmail);
-        reject(err);
+        //console.log(err.code, ':', err.message, ',email:', userEmail);
+        return reject(err);
       }
       else {
         //find tempuser by id
@@ -113,15 +125,15 @@ class UserController {
           if (doc.email.toString() == userEmail.toString()) {
             this.getHash(userPassword).then((hash) => {
               this.user.signUp(userId, doc.name.toString(), userEmail, hash, userRole).then((user) => {
-                console.log('UC_SUCCESS_SIGNUP:', user);
-                resolve(user);
+                //console.log('UC_SUCCESS_SIGNUP:', user);
+                return resolve(user);
               }).catch((error) => {
-                console.log('UC_ERROR:', error.message, ',_id:', userId);
-                reject(error);
+                //console.log('UC_ERROR:', error.message, ',_id:', userId);
+                return reject(error);
               });
             }).catch((error) => {
-              console.log('UC_ERROR:', error.message, ',_id:', userId);
-              reject(error);
+              //console.log('UC_ERROR:', error.message, ',_id:', userId);
+              return reject(error);
             });
 
           } else {
@@ -130,7 +142,7 @@ class UserController {
               message: 'User details are mismatch.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           }
         }).catch((error) => {
           let err = {
@@ -138,8 +150,8 @@ class UserController {
             message: error.message,
             status: error.status
           };
-          console.log(err.code, ':', err.message, ',_id:', userId);
-          reject(err);
+          //console.log(err.code, ':', err.message, ',_id:', userId);
+          return reject(err);
         })
 
       }
@@ -155,42 +167,69 @@ class UserController {
         let err = {
           code: 'UC_ERROR_LOGIN_VALIDATION',
           message: 'Invalid email address.',
-          status: ''
+          status: 400
         };
-        console.log(err.code, ':', err.message, ',email:', userEmail);
-        reject(err);
+        //console.log(err.code, ':', err.message, ',email:', userEmail);
+        return reject(err);
       } else {
         this.user.login(userEmail).then((doc) => {
           this.compareHash(userPassword, doc.password).then((passwordsMatch) => {
             if (passwordsMatch) {
-              let user = {
-                id: doc._id.toString(),
-                name: doc.name,
-                email: doc.email,
-                role: doc.role,
-                profile: doc.profile
-              };
-              console.log('UC_SUCCESS_LOGIN:', user);
-              resolve(user);
+
+              //console.log('UC_SUCCESS_LOGIN:', user);
+              this.user.pushToken(doc._id).then((token) => {
+                let user = {
+                  name: doc.name,
+                  email: doc.email,
+                  role: doc.role,
+                  profile: doc.profile,
+                  token: token.token
+                };
+                return resolve(user);
+
+              }).catch((error) => {
+                let err = {
+                  code: 'UC_ERROR_TOKEN_STORE',
+                  message: 'Token store error',
+                  status: 500
+                };
+                return reject(err);
+
+              });
             } else {
               let err = {
                 code: 'UC_ERROR_LOGIN_INVALID_PASSWORD',
                 message: 'User password is wrong.',
-                status: ''
+                status: 400
               };
-              console.log(err.code, ':', err.message, ',email:', userEmail);
-              reject(err);
+              //console.log(err.code, ':', err.message, ',email:', userEmail);
+              return reject(err);
             }
           }).catch((error) => {
-            console.log('UC_ERROR_LOGIN:', error.message, ',email:', userEmail);
-            reject(error);
+            //console.log('UC_ERROR_LOGIN:', error.message, ',email:', userEmail);
+            return reject(error);
           });
         }).catch((error) => {
-          console.log('UC_ERROR_LOGIN:', error.message, ',email:', userEmail);
-          reject(error);
+          //console.log('UC_ERROR_LOGIN:', error.message, ',email:', userEmail);
+          return reject(error);
         });
       }
 
+    });
+  }
+
+  userLogout(data) {
+    let token = data.userToken;
+    return new Promise((resolve, reject) => {
+      if (token != null || token != undefined) {
+        this.user.popToken(token).then(() => {
+          return resolve();
+        }).catch((error) => {
+          return reject();
+        });
+      } else {
+        return reject();
+      }
     });
   }
 
@@ -206,7 +245,7 @@ class UserController {
           message: 'Invalid keyword.',
           status: 400
         }
-        reject(err);
+        return reject(err);
       }
       else {
         //search job opportunities
@@ -230,20 +269,19 @@ class UserController {
 
           //if no result found return empty array
           if (newJobArray.length === 0) {
-            resolve([]);
-            return;
+            return resolve([]);
           }
 
           //if job results found then search company details for particular job
           this.user.getBulkEmployers(employerIds).then((companyArray) => {
-            resolve([newJobArray, companyArray]);
+            return resolve([newJobArray, companyArray]);
           }).catch((error) => {
-            reject(error);
+            return reject(error);
 
           });
 
         }).catch((error) => {
-          reject(error);
+          return reject(error);
 
         });
       }
@@ -265,11 +303,11 @@ class UserController {
         timeout: 3000
       }, (error, response, body) => {
         if (!error && response.statusCode == 200) {
-          console.log("PHP_SERVER_RESPONSE:{", body, "}");
-          resolve();
+          //console.log("PHP_SERVER_RESPONSE:{", body, "}");
+          return resolve();
         } else {
-          console.log("PHP_SERVER_ERROR:", error.message, ",email:", userEmail);
-          reject(error);
+          //console.log("PHP_SERVER_ERROR:", error.message, ",email:", userEmail);
+          return reject(error);
         }
       });
     });
@@ -280,9 +318,9 @@ class UserController {
     return new Promise((resolve, reject) => {
       const saltRound = 10;
       bcrypt.hash(password, saltRound).then((hash) => {
-        resolve(hash);
+        return resolve(hash);
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
     });
 
@@ -292,9 +330,9 @@ class UserController {
   compareHash(password, hashed) {
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, hashed).then((res) => {
-        resolve(res);
+        return resolve(res);
       }).catch((error) => {
-        reject(error);
+        return reject(error);
       });
     });
   }

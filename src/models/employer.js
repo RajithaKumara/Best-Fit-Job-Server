@@ -15,16 +15,16 @@ class Employer {
       let mongoose = this.dbConn.getConnection();
 
       authUserModel.findById(u_id).then((doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc === null || doc === undefined) {
           let err = {
             code: 'DB_ERROR_AUTH_GET',
             message: 'User id not found.',
-            status: ''
+            status: 400
           };
           console.log(err.code, ':', err.message, ',_id:', u_id);
-          reject(err);
+          return reject(err);
         } else {
           let user = {
             id: doc._id.toString(),
@@ -33,14 +33,14 @@ class Employer {
             role: doc.role
           };
           console.log('DB_SUCCESS_AUTH_GET:', user);
-          resolve(user);
+          return resolve(user);
         }
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         console.log('DB_ERROR_AUTH_GET:', error.message, ',_id:', u_id);
-        reject(error);
+        return reject(error);
 
       });
     });
@@ -52,7 +52,7 @@ class Employer {
       let mongoose = this.dbConn.getConnection();
 
       authUserModel.findOne({ _id: u_id, email: _email }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc === null || doc === undefined) {
           let err = {
@@ -61,7 +61,7 @@ class Employer {
             status: 400
           };
           console.log(err.code, ':', err.message, ',_id:', u_id, ',email:', _email);
-          reject(err);
+          return reject(err);
         } else {
           let user = {
             id: doc._id.toString(),
@@ -70,11 +70,11 @@ class Employer {
             role: doc.role
           };
           console.log('DB_SUCCESS_AUTH_GET_E&I:', user);
-          resolve(user);
+          return resolve(user);
         }
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         let err = {
           code: 'DB_ERROR_AUTH_GET_E&I',
@@ -82,7 +82,7 @@ class Employer {
           status: 500
         };
         console.log(err.code, ':', error.message, ',_id:', u_id);
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -94,23 +94,23 @@ class Employer {
       let mongoose = this.dbConn.getConnection();
 
       employerModel.findOne({ _id: u_id, email: _email }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc === null || doc === undefined) {
           let err = {
             code: 'DB_ERROR_GET_E&I',
-            message: 'User id and email mismatch.',
+            message: 'User not found. Please first complete "Create profile" section.',
             status: 400
           };
           console.log(err.code, ':', err.message, ',_id:', u_id, ',email:', _email);
-          reject(err);
+          return reject(err);
         } else {
           console.log('DB_SUCCESS_GET_E&I:', u_id);
-          resolve();
+          return resolve();
         }
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         let err = {
           code: 'DB_ERROR_GET_E&I',
@@ -118,7 +118,7 @@ class Employer {
           status: 500
         };
         console.log(err.code, ':', error.message, ',_id:', u_id);
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -129,9 +129,13 @@ class Employer {
     return new Promise((resolve, reject) => {
       let mongoose = this.dbConn.getConnection();
 
-      employerModel.findById(u_id).then((doc) => {
+      employerModel.findById(
+        u_id,
+        'firstName lastName country summary contacts companyName companyUrl date companyEmail aboutCompany '
+        + 'jobType companySize companyType tags companyBuilding companyAddress companyCountry groups'
+      ).then((doc) => {
         console.log('DB_SUCCESS_EMP_GET:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc == null || doc == undefined) {
           let err = {
@@ -139,41 +143,20 @@ class Employer {
             message: 'User not found. Please first complete "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else {
-          let employerProfile = {
-            firstName: doc.firstName,
-            lastName: doc.lastName,
-            country: doc.country,
-            summary: doc.summary,
-            contacts: doc.contacts,
-
-            companyName: doc.companyName,
-            companyUrl: doc.companyUrl,
-            date: doc.date,
-            companyEmail: doc.companyEmail,
-            aboutCompany: doc.aboutCompany,
-            jobType: doc.jobType,
-            companySize: doc.companySize,
-            companyType: doc.companyType,
-            tags: doc.tags,
-            companyBuilding: doc.companyBuilding,
-            companyAddress: doc.companyAddress,
-            companyCountry: doc.companyCountry,
-            groups: doc.groups
-          };
-          resolve(employerProfile);
+          return resolve(doc);
 
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_PROFILE',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -196,13 +179,13 @@ class Employer {
 
       employer.save().then((doc) => {
         console.log('DB_SUCCESS_EMP_INSERT:', doc);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_STORE_EMP_INFO',
           message: error.message,
@@ -213,7 +196,7 @@ class Employer {
           err.status = 400;
         }
 
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -233,7 +216,7 @@ class Employer {
       };
 
       employerModel.findByIdAndUpdate(u_id, { $set: updateOwner }, { new: true }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (error) {
           console.log('DB_ERROR:', error.message, ',_id:', u_id);
@@ -242,7 +225,7 @@ class Employer {
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         } else {
           if (doc == null || doc == undefined) {
@@ -251,10 +234,10 @@ class Employer {
               message: 'Employer not found to update.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           } else {
             console.log('DB_SUCCESS_EMP_UPDATE:', doc);
-            resolve(doc);
+            return resolve(doc);
           }
         }
       });
@@ -284,7 +267,7 @@ class Employer {
       console.log(updateCompany);
 
       employerModel.findByIdAndUpdate(u_id, { $set: updateCompany }, { new: true }, (error, doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (error) {
           console.log('DB_ERROR:', error.message, ',_id:', u_id);
@@ -293,7 +276,7 @@ class Employer {
             message: error.message,
             status: 500
           };
-          reject(err);
+          return reject(err);
 
         } else {
           if (doc == null || doc == undefined) {
@@ -302,10 +285,10 @@ class Employer {
               message: 'Employer not found to update.',
               status: 400
             };
-            reject(err);
+            return reject(err);
           } else {
             console.log('DB_SUCCESS_EMP_UPDATE:', doc);
-            resolve(doc);
+            return resolve(doc);
           }
         }
       });
@@ -319,7 +302,7 @@ class Employer {
 
       employerModel.findById(u_id).then((doc) => {
         console.log('DB_SUCCESS_EMP_GET:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc == null || doc == undefined) {
           let err = {
@@ -327,7 +310,7 @@ class Employer {
             message: 'User not found. Please first complete "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else {
           let employerProfile = {
             firstName: doc.firstName,
@@ -336,18 +319,18 @@ class Employer {
             summary: doc.summary,
             contacts: doc.contacts
           };
-          resolve(employerProfile);
+          return resolve(employerProfile);
 
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_PROFILE',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -361,7 +344,7 @@ class Employer {
 
       employerModel.findById(u_id).then((doc) => {
         console.log('DB_SUCCESS_EMP_GET:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
         if (doc == null || doc == undefined) {
           let err = {
@@ -369,7 +352,7 @@ class Employer {
             message: 'User not found. Please first complete "Create profile" section.',
             status: 400
           };
-          reject(err);
+          return reject(err);
         } else {
           let employerProfile = {
             companyName: doc.companyName,
@@ -386,18 +369,18 @@ class Employer {
             companyCountry: doc.companyCountry,
             groups: doc.groups
           };
-          resolve(employerProfile);
+          return resolve(employerProfile);
 
         }
       }).catch((error) => {
         console.log('DB_ERROR:', error.message, ',_id:', u_id);
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_PROFILE',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });
@@ -412,18 +395,18 @@ class Employer {
       let mongoose = this.dbConn.getConnection();
 
       seekerModel.find(searchQuery, '_id general contacts experience education ksao extra tags').then((doc) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
 
-        resolve(doc);
+        return resolve(doc);
 
       }).catch((error) => {
-        try { this.dbConn.closeConnection(mongoose); } catch (e) { console.log(e); }
+        this.dbConn.closeConnection(mongoose);
         let err = {
           code: 'DB_ERROR_GET_JOB',
           message: error.message,
           status: 500
         };
-        reject(err);
+        return reject(err);
 
       });
     });

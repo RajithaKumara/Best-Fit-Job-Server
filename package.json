@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon ./bin/www",
     "start": "node ./bin/www",
-    "test": "mocha \"./{ ,!(node_modules)/**/}*.test.js\" -t 5000",
+    "test": "mocha \"./{ ,!(node_modules)/**/}*.test.js\" -t 5000 --exit",
     "test-watch": "nodemon --exec \"npm test\""
   },
   "dependencies": {

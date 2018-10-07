@@ -4,6 +4,7 @@ const pingURL = "http://www.google.com";
 
 const tempUser_id = "5adc3d2a2e1728b70a9c7207";
 const tempUser_email = "tempUser@domain.com";
+const tempUser_token = "5adc3d2a2e1728b70a9c7207";
 
 const seeker1_id = "5acf6ac7ce5baa1d7c09841e";
 const seeker1_email = "seeker1.email@domain.com";
@@ -165,6 +166,7 @@ module.exports = {
   redisDbLocalURI,
   pingURL,
   tempUser_id,
+  tempUser_token,
   tempUser_email,
   seeker1_id,
   seeker1_email,

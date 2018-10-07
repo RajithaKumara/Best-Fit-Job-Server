@@ -168,8 +168,11 @@ describe('Analysor Model', () => {
 
     it('should not suggest jobs for not exist tags', (done) => {
       this.analysor.suggestJob(seeker_profile2).then((res) => {
-        //should have internet connection
+        //should have internet connection and valid google NLP API key at env.NLP_API_KEY
         expect(res.length).toBe(3);
+        done();
+      }).catch((error) => {
+        console.error(error);
         done();
       });
     });

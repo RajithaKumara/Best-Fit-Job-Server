@@ -2,7 +2,7 @@ const expect = require('expect');
 const rewire = require('rewire');
 const testDbConn = require('../testMongooseConn');
 const authUserModel = require('../../src/config/database/mongooseModels/authUserModel');
-const { tempUser_id } = require('../testData');
+const { tempUser_id, tempUser_token } = require('../testData');
 
 var User = rewire('../../src/models/user')
 User.__set__('DbConn', testDbConn);
@@ -39,9 +39,9 @@ describe('User Model', () => {
 
   describe('src->models->user->tempSignUp', () => {
     it('should success with valid id', (done) => {
-      this.user.tempSignUp(this.testTempUserId).then((doc) => {
+      this.user.tempSignUp(this.testTempUserId, tempUser_token).then((doc) => {
         try {
-          expect(doc._id.toString()).toBe(this.testTempUserId);
+          expect(doc._id.toString()).toBe(tempUser_token);
           expect(doc.name).toBe("First Last Name");
         } catch (e) {
           expect(doc.role).toBe("seeker");
@@ -70,7 +70,6 @@ describe('User Model', () => {
         "password",
         "seeker"
       ).then((doc) => {
-        expect(doc.id.toString()).toBe(this.testTempUserId);
         expect(doc.name).toBe("First Last Name");
         expect(doc.email).toBe("email@domain.com");
         expect(doc.role).toBe("seeker");

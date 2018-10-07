@@ -8,7 +8,7 @@ class DbConn {
   }
 
   getConnection() {
-    mongoose.connect(mongoDbLocalURI);
+    mongoose.connect(mongoDbLocalURI || process.env.MONGODB_TEST_URI);
     return mongoose;
   }
 

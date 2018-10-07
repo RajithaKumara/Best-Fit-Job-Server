@@ -8,7 +8,7 @@ class RedisConn {
   }
 
   getConnection() {
-    this.client = redis.createClient(redisDbLocalURI);
+    this.client = redis.createClient(redisDbLocalURI || process.env.REDIS_TEST_URL);
     this.client.on("error", function (err) {
       console.log("Redis_Error: ", err);
     });

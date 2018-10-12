@@ -3,7 +3,11 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-	res.render('index', { title: 'Best Fit Job Server' });
+	try {
+		res.sendFile(path.join(__dirname + '/../public/index.html'));
+	} catch (error) {
+		res.render('index', { title: 'Best Fit Job Server' });
+	}
 });
 
 module.exports = router;

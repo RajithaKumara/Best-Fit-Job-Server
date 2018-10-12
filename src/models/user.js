@@ -171,7 +171,7 @@ class User {
             let err = {
               code: 'DB_SUCCESS_AUTH_NULL',
               message: 'Please register and try again.',
-              status: ''
+              status: 400
             };
             console.log(err.code, ':', 'email:', _email);
             return reject(err);

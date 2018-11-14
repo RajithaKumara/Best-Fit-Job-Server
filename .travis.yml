@@ -3,7 +3,8 @@ dist: trusty
 
 language: node_js
 node_js:
-  - "lts/*"
+  - 8.12.0
+#  - "lts/*"
 
 services:
   - mongodb

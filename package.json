@@ -36,5 +36,8 @@
     "nodemon": "^1.15.1",
     "rewire": "^3.0.2",
     "supertest": "^3.0.0"
+  },
+  "engines": {
+    "node": "8.12.x"
   }
 }
